@@ -1,7 +1,7 @@
     const mongoose = require('mongoose');
     const { type } = require('node:os');
     const { stringify } = require('node:querystring');
-    // const bcrypt = require('bcrypt')
+    const bcrypt = require('bcrypt')
     //create person schema
 
     const userSchema = new mongoose.Schema({

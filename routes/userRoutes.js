@@ -1,12 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const {jwtAuthMiddleware, generateToken} = require('../jwt')
+const {jwtAuthMiddleware, generateToken} = require('../jwt');
+const Candidate = require('../models/candidate');
 
 
 router.post('/signup',async (req, res) =>{
    try{
-    const data = req.body;
+       const data = req.body;
+
+       // insure only one admin in user table 
+       const adminUser = await User.findOne({'role':'admin'});
+        if(data.role == 'admin' && adminUser){
+            return res.status(400).json({message: "Admin user is already exist"})
+        }
+
+        if(!/^\d{12}$/.test(data.aadharCardNumber)){
+            return res.status(400).json({message: "Aadhar number should have 12 digits"})
+        }
+
+        const existUser = await User.findOne({aadharCardNumber: data.aadharCardNumber});
+        if(existUser){
+            return res.status(400).json({message: "User with the same Aadhar Card Number already exists"})
+        }
 
     const newUser = new User(data);
 
@@ -37,7 +53,7 @@ router.post('/login', async(req, res) => {
         const {aadharCardNumber, password} = req.body;
 
         // find the user by aadharCardNumber
-        const user = await Person.findOne({aadharCardNumber: aadharCardNumber});
+        const user = await User.findOne({aadharCardNumber: aadharCardNumber});
 
         // if user does not exit or password does not match, return error
         if(!user || !(await user.comparePassword(password))){
@@ -73,8 +89,6 @@ router.get('/profile', jwtAuthMiddleware, async(req, res) => {
         res.status(500).json({error: "Internal server error"}) 
     }
 })
-
-
 
 router.put('/profile/password', async(req, res) => {
     try {
