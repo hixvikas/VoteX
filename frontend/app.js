@@ -4,7 +4,6 @@ import './styles.css';
   'use strict';
 
   // 1. Configuration & Global State
-  const API_BASE_URL = window.VOTEX_API_BASE_URL || (window.location.port === '5173' ? '/api' : 'http://localhost:3000');
   const API_BASE_URL = window.VOTEX_API_BASE_URL || (window.location.port === '5173' ? '/api' : '');
 
   const state = {
