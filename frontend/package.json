@@ -1,0 +1,14 @@
+{
+  "name": "votex-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vanilla HTML, CSS, and JavaScript frontend for VoteX.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}

@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="VoteX - A clean, secure, and transparent civic voting application."
+    />
+    <title>VoteX — A Voting Platform</title>
+    <script type="module" crossorigin src="/assets/index-CrKPTDGJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-1WP6xvXF.css">
+  </head>
+  <body>
+    <!-- Sticky Top Navigation -->
+    <header class="site-header">
+      <div class="header-inner">
+        <button
+          class="brand"
+          type="button"
+          data-action="nav-dashboard"
+          aria-label="VoteX Homepage"
+        >
+          <span class="brand-icon" aria-hidden="true">✓</span>
+          <span class="brand-name"
+            >Vote<span class="brand-accent">X</span></span
+          >
+        </button>
+
+        <div class="header-right">
+          <div id="user-badge" class="user-badge" style="display: none;" hidden>
+            <span class="badge-role" id="user-role-label"></span>
+            <span class="badge-name" id="user-name-label"></span>
+          </div>
+          <nav id="app-nav" class="app-nav" aria-label="Main Navigation"></nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Global Feedback / Alert Banner -->
+    <div class="notice-wrapper">
+      <div
+        id="notice"
+        class="notice"
+        role="alert"
+        aria-live="polite"
+        hidden
+      ></div>
+    </div>
+
+    <!-- Main View Container -->
+    <main id="main-content" class="main-shell" tabindex="-1">
+      <!-- 1. DASHBOARD VIEW (Default Landing) -->
+      <section id="view-dashboard" class="view-panel">
+        <!-- Hero Intro -->
+        <div class="hero-card">
+          <div class="hero-tag">Official Civic Election</div>
+          <h1 class="hero-title">Transparent, Secure & Simple Voting</h1>
+          <p class="hero-desc">
+            VoteX enables verified citizens to participate in democratic
+            decision-making with guaranteed one-voter-one-vote integrity. Review
+            candidates, track real-time vote totals, and cast your ballot.
+          </p>
+          <div class="hero-trust-row">
+            <div class="trust-item">
+              <span class="trust-check">✓</span> Aadhaar Verified
+            </div>
+            <div class="trust-item">
+              <span class="trust-check">✓</span> One Person, One Vote
+            </div>
+            <div class="trust-item">
+              <span class="trust-check">✓</span> Live Tallying
+            </div>
+            <div class="trust-item">
+              <span class="trust-check">✓</span> Role-Based Governance
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Metrics Strip -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-label">Total Candidates</span>
+            <span class="metric-val" id="metric-candidate-count">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Total Votes Cast</span>
+            <span class="metric-val" id="metric-vote-count">--</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Election Status</span>
+            <span class="metric-val metric-status"
+              ><span class="pulse-dot"></span> Live</span
+            >
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Your Session</span>
+            <span class="metric-val" id="metric-user-status">Guest</span>
+          </div>
+        </div>
+
+        <!-- Two-Column Layout: Candidates + Live Results -->
+        <div class="dashboard-grid">
+          <!-- Candidates List Column -->
+          <div class="panel-box candidates-column">
+            <div class="box-header">
+              <div>
+                <h2 class="box-title">Ballot Candidates</h2>
+                <p class="box-subtitle">
+                  Official candidates registered for this election
+                </p>
+              </div>
+              <button
+                class="btn btn-outline btn-sm"
+                id="btn-refresh-candidates"
+                type="button"
+              >
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="dashboard-candidate-list" class="candidate-grid">
+              <div class="state-empty">Loading candidate database…</div>
+            </div>
+          </div>
+
+          <!-- Live Vote Tally Column -->
+          <div class="panel-box results-column">
+            <div class="box-header">
+              <div>
+                <h2 class="box-title">Live Vote Count</h2>
+                <p class="box-subtitle">
+                  Real-time vote count by party affiliation
+                </p>
+              </div>
+              <span class="live-pill"
+                ><span class="pulse-dot"></span> Auto-updates</span
+              >
+            </div>
+            <div id="dashboard-results-container">
+              <div class="state-empty">Loading election counts…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. SIGN IN VIEW (Standalone) -->
+      <section id="view-login" class="view-panel" hidden>
+        <div class="auth-wrapper">
+          <div class="auth-card">
+            <!-- Pending Vote Notice if redirected from ballot -->
+            <div id="login-pending-banner" class="pending-banner" hidden>
+              <span class="pending-icon">ℹ</span>
+              <span id="login-pending-text">Please sign in to cast your vote.</span>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="form-login" class="form-layout" novalidate>
+              <div class="form-header">
+                <h2>Sign In to VoteX</h2>
+                <p>
+                  Enter your 12-digit Aadhaar number and password to access your ballot.
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label for="login-aadhar">Aadhaar Card Number</label>
+                <input
+                  id="login-aadhar"
+                  name="aadharCardNumber"
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]{12}"
+                  maxlength="12"
+                  placeholder="Aadhaar Number"
+                  required
+                  autocomplete="username"
+                />
+                <span class="field-hint">Enter your 12-digit numeric Aadhaar identifier.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="login-password">Password</label>
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  required
+                  autocomplete="current-password"
+                />
+              </div>
+
+              <button class="btn btn-primary btn-block" type="submit">
+                Sign In to VoteX
+              </button>
+
+              <div class="auth-footer-link">
+                <span>Don't have an account yet?</span>
+                <button class="link-btn" data-nav="signup" type="button">
+                  Create an account here
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2b. SIGN UP VIEW (Standalone) -->
+      <section id="view-signup" class="view-panel" hidden>
+        <div class="auth-wrapper">
+          <div class="auth-card auth-card-wide">
+            <!-- Pending Vote Notice if redirected from ballot -->
+            <div id="signup-pending-banner" class="pending-banner" hidden>
+              <span class="pending-icon">ℹ</span>
+              <span id="signup-pending-text">Please create an account to cast your vote.</span>
+            </div>
+
+            <!-- Sign Up Form -->
+            <form id="form-signup" class="form-layout" novalidate>
+              <div class="form-header">
+                <h2>Create Your VoteX Account</h2>
+                <p>
+                  Register with your Aadhaar credentials to participate in civic elections.
+                </p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="signup-name">Full Name *</label>
+                  <input
+                    id="signup-name"
+                    name="name"
+                    type="text"
+                    placeholder="Name"
+                    required
+                    autocomplete="name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="signup-age">Age * (18+)</label>
+                  <input
+                    id="signup-age"
+                    name="age"
+                    type="number"
+                    min="18"
+                    max="120"
+                    placeholder="Age"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="signup-aadhar">12-Digit Aadhaar Card Number *</label>
+                  <input
+                    id="signup-aadhar"
+                    name="aadharCardNumber"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]{12}"
+                    maxlength="12"
+                    placeholder="Aadhaar Number"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="signup-role">Account Role *</label>
+                  <select id="signup-role" name="role" required>
+                    <option value="voter" selected>
+                      Voter (Eligible to cast ballot)
+                    </option>
+                    <option value="admin">
+                      Admin (Election Administrator)
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="signup-address">Residential Address *</label>
+                <textarea
+                  id="signup-address"
+                  name="address"
+                  rows="2"
+                  placeholder="Full residential address"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="signup-email">Email Address <span class="opt-tag">(Optional)</span></label>
+                  <input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="email@example.com"
+                    autocomplete="email"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="signup-mobile">Mobile Number <span class="opt-tag">(Optional)</span></label>
+                  <input
+                    id="signup-mobile"
+                    name="mobile"
+                    type="tel"
+                    placeholder="999***9999"
+                    autocomplete="tel"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="signup-password">Password *</label>
+                <input
+                  id="signup-password"
+                  name="password"
+                  type="password"
+                  minlength="4"
+                  placeholder="At least 4 characters"
+                  required
+                  autocomplete="new-password"
+                />
+              </div>
+
+              <button class="btn btn-primary btn-block" type="submit">
+                Create Account
+              </button>
+
+              <div class="auth-footer-link">
+                <span>Already have an account?</span>
+                <button class="link-btn" data-nav="login" type="button">
+                  Sign in here
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2c. ABOUT US & TRUST VIEW -->
+      <section id="view-about" class="view-panel" hidden>
+        <!-- Hero Box -->
+        <div class="about-hero">
+          <div class="hero-tag">Verified Civic Platform</div>
+          <h1 class="hero-title">About VoteX — Authentic, Secure Democracy</h1>
+          <p class="hero-desc">
+            VoteX is an authentic digital civic election application built upon the principles of verifiable identity, cryptographic auditing, and complete public transparency. Every ballot is guaranteed to be one citizen, one voice, counted exactly as cast.
+          </p>
+          <div class="hero-trust-row">
+            <div class="trust-item"><span class="trust-check">✓</span> 100% Aadhaar Verified Citizens</div>
+            <div class="trust-item"><span class="trust-check">✓</span> Non-Tamperable Cryptographic Ballots</div>
+            <div class="trust-item"><span class="trust-check">✓</span> Real-Time Public Vote Tallies</div>
+            <div class="trust-item"><span class="trust-check">✓</span> Strict Admin Neutrality Constraints</div>
+          </div>
+        </div>
+
+        <!-- Trust Pillars Grid -->
+        <div class="panel-box">
+          <div class="box-header">
+            <div>
+              <h2 class="box-title">Why VoteX is Authentic & Trustworthy</h2>
+              <p class="box-subtitle">Security measures engineered to eliminate voter fraud and protect election integrity</p>
+            </div>
+            <span class="live-pill"><span class="pulse-dot"></span> Certified Integrity</span>
+          </div>
+
+          <div class="trust-pillars-grid">
+            <article class="trust-card">
+              <div class="trust-icon-badge">🪪</div>
+              <h3 class="trust-card-title">Aadhaar Identity Verification</h3>
+              <p class="trust-card-text">
+                Every voter registration requires a valid 12-digit Aadhaar identifier. Fictitious registrations, bots, and duplicate accounts are strictly prevented at registration.
+              </p>
+            </article>
+
+            <article class="trust-card">
+              <div class="trust-icon-badge">🔒</div>
+              <h3 class="trust-card-title">Single Ballot Enforcement</h3>
+              <p class="trust-card-text">
+                Our database enforces atomic single-vote constraints. Once a voter submits their ballot, their profile is permanently sealed (<code>isVoted = true</code>), making multiple votes impossible.
+              </p>
+            </article>
+
+            <article class="trust-card">
+              <div class="trust-icon-badge">📊</div>
+              <h3 class="trust-card-title">Live Public Auditing</h3>
+              <p class="trust-card-text">
+                Results and party tallies are streamed in real time directly from the database to this website. No secret counts, delayed disclosures, or hidden vote modifications.
+              </p>
+            </article>
+
+            <article class="trust-card">
+              <div class="trust-icon-badge">🛡️</div>
+              <h3 class="trust-card-title">Admin Neutrality Lockdown</h3>
+              <p class="trust-card-text">
+                Election administrators have permissions to register and update candidate profiles, but the server strictly blocks administrators from voting.
+              </p>
+            </article>
+
+            <article class="trust-card">
+              <div class="trust-icon-badge">🔐</div>
+              <h3 class="trust-card-title">Confidential & Encrypted</h3>
+              <p class="trust-card-text">
+                Passwords are salted and hashed using industry-standard bcrypt encryption. Your individual voting choice is protected and private.
+              </p>
+            </article>
+
+            <article class="trust-card">
+              <div class="trust-icon-badge">✓</div>
+              <h3 class="trust-card-title">Zero Third-Party Tracking</h3>
+              <p class="trust-card-text">
+                VoteX operates without external tracking, commercial advertising, or third-party data sharing. Your personal data stays on the secure civic election node.
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <!-- How Voting Works -->
+        <div class="panel-box">
+          <div class="box-header">
+            <h2 class="box-title">How Democratic Participation Works on VoteX</h2>
+          </div>
+          <div class="steps-grid">
+            <div class="step-card">
+              <span class="step-number">1</span>
+              <h3 class="trust-card-title">Register & Verify</h3>
+              <p class="trust-card-text">Create your voter profile using your full name, eligible age (18+), and 12-digit Aadhaar number.</p>
+            </div>
+            <div class="step-card">
+              <span class="step-number">2</span>
+              <h3 class="trust-card-title">Review & Cast Ballot</h3>
+              <p class="trust-card-text">Inspect official candidate profiles, their party affiliations, and submit your one confidential ballot.</p>
+            </div>
+            <div class="step-card">
+              <span class="step-number">3</span>
+              <h3 class="trust-card-title">Monitor Live Results</h3>
+              <p class="trust-card-text">Watch election tallies update in real time with automated 15-second data synchronization.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trust FAQs -->
+        <div class="panel-box">
+          <div class="box-header">
+            <h2 class="box-title">Frequently Asked Trust & Security Questions</h2>
+          </div>
+          <div class="faq-grid">
+            <div class="faq-card">
+              <span class="faq-question">Can someone vote twice using the same Aadhaar?</span>
+              <p class="faq-answer">No. The system uses strict database uniqueness constraints on Aadhaar numbers and irreversibly marks the voter record as voted upon submission.</p>
+            </div>
+            <div class="faq-card">
+              <span class="faq-question">Can an administrator alter my vote?</span>
+              <p class="faq-answer">No. Candidate votes are stored as permanent sub-document references and total counts are calculated mathematically by the database.</p>
+            </div>
+            <div class="faq-card">
+              <span class="faq-question">How do I know the election results are real?</span>
+              <p class="faq-answer">Vote counts are queried live directly from the candidate collection in MongoDB. The live tally matches the total verified ballots submitted.</p>
+            </div>
+            <div class="faq-card">
+              <span class="faq-question">What if I need to change my vote?</span>
+              <p class="faq-answer">To ensure zero election tampering and prevent coerced re-voting, a ballot is final and cannot be modified once confirmed.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. VOTER BALLOT VIEW (Voters Only) -->
+      <section id="view-ballot" class="view-panel" hidden>
+        <div class="section-head">
+          <div>
+            <h1 class="section-title">Official Voter Ballot</h1>
+            <p class="section-subtitle">
+              Select one candidate to cast your vote. Your ballot is
+              confidential and final.
+            </p>
+          </div>
+        </div>
+
+        <!-- Voter Status Banner -->
+        <div id="voter-status-banner" class="status-banner"></div>
+
+        <!-- Ballot Candidates Grid -->
+        <div class="panel-box">
+          <div class="box-header">
+            <h2 class="box-title">Choose Candidate</h2>
+            <span class="badge-neutral" id="ballot-count-badge"
+              >Candidates</span
+            >
+          </div>
+          <div id="ballot-candidate-list" class="candidate-grid">
+            <div class="state-empty">Loading ballot candidates…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. ADMIN MANAGEMENT VIEW (Admins Only) -->
+      <section id="view-admin" class="view-panel" hidden>
+        <div class="section-head">
+          <div>
+            <h1 class="section-title">Candidate Administration</h1>
+            <p class="section-subtitle">
+              Add, update, or remove candidates from the active election ballot.
+            </p>
+          </div>
+          <span class="badge-role admin-tag">Admin Authorization</span>
+        </div>
+
+        <div class="admin-grid">
+          <!-- Add / Edit Candidate Form -->
+          <div class="panel-box">
+            <div class="box-header">
+              <h2 class="box-title" id="admin-form-title">Add New Candidate</h2>
+            </div>
+            <form id="form-candidate" class="form-layout" novalidate>
+              <input
+                type="hidden"
+                id="admin-candidate-id"
+                name="candidateId"
+                value=""
+              />
+
+              <div class="form-group">
+                <label for="admin-candidate-name">Candidate Name *</label>
+                <input
+                  id="admin-candidate-name"
+                  name="name"
+                  type="text"
+                  placeholder="Candidate Name"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="admin-candidate-party">Party Affiliation *</label>
+                <input
+                  id="admin-candidate-party"
+                  name="party"
+                  type="text"
+                  placeholder="e.g. Democratic Alliance (DA)"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="admin-candidate-age">Age *</label>
+                <input
+                  id="admin-candidate-age"
+                  name="age"
+                  type="number"
+                  min="25"
+                  max="100"
+                  placeholder="Age"
+                  required
+                />
+              </div>
+
+              <div class="form-actions">
+                <button
+                  class="btn btn-primary"
+                  id="btn-save-candidate"
+                  type="submit"
+                >
+                  Add Candidate
+                </button>
+                <button
+                  class="btn btn-outline"
+                  id="btn-cancel-candidate-edit"
+                  type="button"
+                  hidden
+                >
+                  Cancel Edit
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Candidate Management Table -->
+          <div class="panel-box">
+            <div class="box-header">
+              <h2 class="box-title">Registered Ballot Candidates</h2>
+              <span class="badge-neutral" id="admin-candidate-count"
+                >0 total</span
+              >
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table" id="admin-candidates-table">
+                <thead>
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Party</th>
+                    <th>Age</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-candidate-tbody">
+                  <tr>
+                    <td colspan="4" class="state-empty">
+                      No candidates found.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. LIVE RESULTS VIEW (Dedicated Full Breakdown) -->
+      <section id="view-results" class="view-panel" hidden>
+        <div class="section-head">
+          <div>
+            <h1 class="section-title">Live Election Results</h1>
+            <p class="section-subtitle">
+              Real-time vote tallies directly synced with the election database.
+            </p>
+          </div>
+          <button
+            class="btn btn-outline btn-sm"
+            id="btn-refresh-full-results"
+            type="button"
+          >
+            ↻ Refresh Counts
+          </button>
+        </div>
+
+        <div class="panel-box">
+          <div id="full-results-container">
+            <div class="state-empty">Loading vote results…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. USER PROFILE VIEW -->
+      <section id="view-profile" class="view-panel" hidden>
+        <div class="section-head">
+          <div>
+            <h1 class="section-title">Your Account Profile</h1>
+            <p class="section-subtitle">
+              Verified registration details linked to your Aadhaar credentials.
+            </p>
+          </div>
+        </div>
+
+        <div class="profile-layout">
+          <div class="panel-box">
+            <div class="profile-header">
+              <div class="profile-avatar" id="profile-avatar">U</div>
+              <div>
+                <h2 class="profile-name" id="profile-name">User Name</h2>
+                <div class="profile-badges">
+                  <span class="badge-role" id="profile-role">Voter</span>
+                  <span class="badge-status" id="profile-voted-pill"
+                    >Not Voted</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <dl class="profile-details-grid">
+              <div class="profile-item">
+                <dt>Aadhaar Number</dt>
+                <dd id="profile-aadhar">•••• •••• ••••</dd>
+              </div>
+              <div class="profile-item">
+                <dt>Age</dt>
+                <dd id="profile-age">--</dd>
+              </div>
+              <div class="profile-item">
+                <dt>Email</dt>
+                <dd id="profile-email">--</dd>
+              </div>
+              <div class="profile-item">
+                <dt>Mobile</dt>
+                <dd id="profile-mobile">--</dd>
+              </div>
+              <div class="profile-item full-span">
+                <dt>Registered Address</dt>
+                <dd id="profile-address">--</dd>
+              </div>
+              <div class="profile-item full-span">
+                <dt>Voting Status</dt>
+                <dd id="profile-voting-status">--</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="panel-box">
+            <h2 class="box-title">Election Participation Rules</h2>
+            <ul class="rules-list">
+              <li>
+                <strong>Single Ballot Integrity:</strong> Each verified Aadhaar
+                identity is permitted to cast exactly one ballot.
+              </li>
+              <li>
+                <strong>Final Submission:</strong> Once a vote is submitted to
+                the database, it cannot be modified or retracted.
+              </li>
+              <li>
+                <strong>Audited Results:</strong> Live tallies are compiled
+                automatically based on confirmed ballots.
+              </li>
+              <li>
+                <strong>Role Distinction:</strong> Administrator accounts govern
+                candidate registrations and are restricted from voting.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Clean Confirmation Modal -->
+    <div id="app-modal" class="modal-backdrop" hidden>
+      <div
+        class="modal-box"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <h3 class="modal-title" id="modal-title">Confirm Vote</h3>
+        <p class="modal-message" id="modal-message">
+          Are you sure you want to proceed?
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" id="modal-cancel-btn" type="button">
+            Cancel
+          </button>
+          <button class="btn btn-primary" id="modal-confirm-btn" type="button">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimal Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span><strong>VoteX</strong> — Secure Civic Voting System</span>
+        <span>Clean · Minimalist · Direct</span>
+      </div>
+    </footer>
+
+  </body>
+</html>

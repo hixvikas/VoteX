@@ -66,7 +66,7 @@ router.put('/:candidateId',jwtAuthMiddleware, async(req, res) => {
 
 router.delete('/:candidateId',jwtAuthMiddleware, async(req, res) => {
     try {
-        if(!checkAdminRole(req.user.id)){
+        if(! await checkAdminRole(req.user.id)){
          return res.status(403).json({message: 'User has not admin role'})}
 
             const candidateId = req.params.candidateId;

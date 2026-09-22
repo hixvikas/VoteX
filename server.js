@@ -15,6 +15,12 @@ const candidate = require('./routes/candidate')
 app.use('/user', userRoutes);
 app.use('/candidate', candidate);
 
+// Keep unexpected server details out of API responses.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: 'Something went wrong. Please try again later.' });
+});
+
 
 
 app.listen(PORT, () => {
