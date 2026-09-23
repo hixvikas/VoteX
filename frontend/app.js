@@ -335,8 +335,64 @@ import './styles.css';
     }
   }
 
-  // 7. View Switcher
-  function switchView(targetView, preserveNotice = false) {
+  // 7. View Switcher & Browser URL Routing
+  const VIEW_ROUTES = {
+    dashboard: '/dashboard',
+    about: '/about',
+    profile: '/profile',
+    login: '/signin',
+    signup: '/signup',
+    ballot: '/ballot',
+    admin: '/admin',
+    results: '/results'
+  };
+
+  const VIEW_TITLES = {
+    dashboard: 'VoteX — Official Civic Voting System',
+    about: 'VoteX — About Our Authentic Election Node',
+    profile: 'VoteX — Voter Profile',
+    login: 'VoteX — Sign In',
+    signup: 'VoteX — Create Account',
+    ballot: 'VoteX — Cast Ballot',
+    admin: 'VoteX — Manage Candidates',
+    results: 'VoteX — Live Election Results'
+  };
+
+  function getViewFromPath(pathname, hash = '') {
+    const cleanPath = (pathname || '').replace(/^\/+|\/+$/g, '').toLowerCase();
+    const cleanHash = (hash || '').replace(/^#\/?/, '').toLowerCase();
+    const segment = cleanPath || cleanHash;
+
+    switch (segment) {
+      case 'about':
+      case 'about-us':
+        return 'about';
+      case 'profile':
+      case 'user-profile':
+        return 'profile';
+      case 'signin':
+      case 'login':
+        return 'login';
+      case 'signup':
+      case 'register':
+        return 'signup';
+      case 'ballot':
+      case 'vote':
+        return 'ballot';
+      case 'admin':
+      case 'candidates':
+        return 'admin';
+      case 'results':
+      case 'live-results':
+        return 'results';
+      case 'dashboard':
+      case '':
+      default:
+        return 'dashboard';
+    }
+  }
+
+  function switchView(targetView, preserveNotice = false, updateHistory = true) {
     if (!preserveNotice) clearNotice();
 
     // Guard role-protected routes
@@ -353,6 +409,10 @@ import './styles.css';
         showNotice('Administrators cannot access the voter ballot.', 'info');
       }
     }
+    if (targetView === 'profile' && !state.user) {
+      targetView = 'login';
+      showNotice('Please sign in to access your voter profile.', 'info');
+    }
 
     state.view = targetView;
 
@@ -365,6 +425,23 @@ import './styles.css';
 
     renderNav();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Update document title
+    if (VIEW_TITLES[targetView]) {
+      document.title = VIEW_TITLES[targetView];
+    }
+
+    // Update browser URL and history
+    if (updateHistory) {
+      const targetPath = VIEW_ROUTES[targetView] || '/dashboard';
+      if (window.location.pathname !== targetPath) {
+        try {
+          window.history.pushState({ view: targetView }, '', targetPath);
+        } catch (e) {
+          window.location.hash = targetPath;
+        }
+      }
+    }
 
     // Trigger View Lifecycle Logic
     if (targetView === 'dashboard') {
@@ -553,7 +630,7 @@ import './styles.css';
     const badge = $('#ballot-count-badge');
 
     if (!state.user) {
-      switchView('auth');
+      switchView('login');
       return;
     }
 
@@ -738,7 +815,7 @@ import './styles.css';
   // 12. Render: Profile View
   function renderProfileView() {
     if (!state.user) {
-      switchView('auth');
+      switchView('login');
       return;
     }
 
@@ -1102,7 +1179,7 @@ import './styles.css';
   const formCandidate = $('#form-candidate');
   if (formCandidate) formCandidate.addEventListener('submit', handleCandidateFormSubmit);
 
-  // 17. Application Initialization
+  // 17. Application Initialization & Browser Routing
   async function init() {
     // Attempt session restore
     if (state.token) {
@@ -1110,9 +1187,36 @@ import './styles.css';
     } else {
       clearAllUserDetails();
     }
-    // Start at default view
-    switchView('dashboard');
+
+    // Determine initial view from current URL pathname or hash
+    const initialView = getViewFromPath(window.location.pathname, window.location.hash);
+    switchView(initialView, false, false);
+
+    // Sync initial history state without adding extra back-button entry
+    const initialPath = VIEW_ROUTES[state.view] || '/dashboard';
+    if (window.location.pathname !== initialPath && window.location.pathname !== '/') {
+      try {
+        window.history.replaceState({ view: state.view }, '', initialPath);
+      } catch (e) {
+        // ignore
+      }
+    }
   }
+
+  // Handle browser Back / Forward history buttons
+  window.addEventListener('popstate', (e) => {
+    const viewFromState = e.state && e.state.view;
+    const targetView = viewFromState || getViewFromPath(window.location.pathname, window.location.hash);
+    switchView(targetView, false, false);
+  });
+
+  // Handle hash changes if hash navigation is used
+  window.addEventListener('hashchange', () => {
+    const targetView = getViewFromPath(window.location.pathname, window.location.hash);
+    if (targetView !== state.view) {
+      switchView(targetView, false, false);
+    }
+  });
 
   init();
 })();
